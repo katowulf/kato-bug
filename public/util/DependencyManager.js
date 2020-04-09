@@ -1,40 +1,65 @@
 
 class DependencyManager {
-  static loadFirebase(version) {
-    const firebaseLibs = [];
-
-    if( version > "4.1.0" ) {
-      firebaseLibs.push(...[
-        `/__/firebase/${version}/firebase-app.js`,
-        `/__/firebase/${version}/firebase-auth.js`,
-        `/__/firebase/${version}/firebase-database.js`,
-        `/__/firebase/${version}/firebase-messaging.js`,
-        `/__/firebase/${version}/firebase-storage.js`,
-        `/__/firebase/${version}/firebase-firestore.js`,
-        `/__/firebase/init.js`
-      ]);
+  constructor(firebaseVersion, firebaseLibs) {
+    this.parallelLibs = [];
+    this.afterLibs = [];
+    if( firebaseVersion > "4.1.0" ) {
+      this.preLibs = [`/__/firebase/${version}/firebase-app.js`];
+      this.firebaseLibs = firebaseLibs.map(lib => `/__/firebase/${firebaseVersion}/firebase-${lib}.js`);
     }
     else {
-      firebaseLibs.push(...[
-        `https://www.gstatic.com/firebasejs/${version}/firebase.js`,
-        `/__/firebase/init.js`
-      ]);
+      this.preLibs = [];
+      this.firebaseLibs = [`https://www.gstatic.com/firebasejs/${version}/firebase.js`];
     }
-
-    return DependencyManager.deps(firebaseLibs);
+    this.firebaseLibs.push(`/__/firebase/init.js`); // it's okay to call init while still loading libs
   }
 
-  static deps(list) {
-    console.log('Fetching dependencies: ', list);
-    return Promise.all(list.map(
-        u => (new Promise((resolver, rejecter) => {
-          const script = document.createElement("script");
-          script.type = "text/javascript";
-          script.src = u;
-          script.async = false;
-          script.onload = () => { console.log("Finished loading", u); resolver(); };
-          document.body.appendChild(script);
-        }))
-    ));
+  /**
+   * Load libraries that don't depend on Firebase and therefore can be loaded in parallel for improved speed.
+   * @param list Array of urls
+   */
+  parallel(list) {
+    this.parallelLibs.push(...list);
+  }
+
+  /**
+   * Load these libraries after Firebase since they depend on the functionality provided there.
+   * @param list
+   */
+  after(list) {
+    this.afterLibs.push(...list);
+  }
+
+  async load() {
+    console.log('Fetching dependencies in this order');
+    console.log(' - Pre: ', this.preLibs);
+    console.log(' - Main: ', this.firebaseLibs);
+    console.log(' - After: ', this.afterLibs);
+    console.log('In parallel: ', this.parallelLibs);
+
+    function doScripts(list) {
+      return Promise.all(list.map(DependencyManager.buildScript));
+    }
+
+    const batch1 = doScripts(this.parallelLibs);
+    const batch2 = doScripts(this.preLibs)
+        .then(() => doScripts(this.firebaseLibs))
+        .then(() => doScripts(this.afterLibs));
+
+    return Promise.all([batch1, batch2]);
+  }
+
+  static buildScript(url) {
+    return new Promise((resolver, rejecter) => {
+      const script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src = url;
+      script.async = true;
+      script.onload = () => {
+        console.log("Finished loading", url);
+        resolver();
+      };
+      document.body.appendChild(script);
+    });
   }
 }

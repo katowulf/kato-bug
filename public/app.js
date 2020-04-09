@@ -7,11 +7,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   // ☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃
   // Load util libs
   // ☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃☃
-  await DependencyManager.deps([
-    'util/DomHelper.js', 'util/Logger.js', 'util/StatusIcon.js'
-  ]);
   const logger = new Logger("#log", "li");
-
 
   // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
   // // The Firebase SDK is initialized and available here!
@@ -23,7 +19,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   //
   // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
   try {
-    await DependencyManager.loadFirebase(version);
+    const mgr = new DependencyManager(version, ['auth', 'firestore', 'database']);
+    mgr.parallel(['util/DomHelper.js', 'util/StatusIcon.js']);
+    await mgr.load();
     app = firebase.app();
     let features = ['auth', 'database', 'firestore', 'messaging', 'storage'].filter(feature => typeof app[feature] === 'function');
     logger.log(`Firebase SDK ${version} loaded with ${features.join(', ')}`);
