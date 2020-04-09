@@ -67,11 +67,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // handle version changes
   function loadVersion(newVersion) {
-    if( version.match(/^[0-9]+\.[0-9]+\.[0-9]+$/) ) {
-      window.location.href = `index.html?v=${version}`;
+    if( newVersion.match(/^[0-9]+\.[0-9]+\.[0-9]+$/) ) {
+      window.location.href = `index.html?v=${newVersion}`;
     }
     else {
-      logger.error(new Error("Invalid version, must match x.x.x format: " + version));
+      logger.error(new Error("Invalid version, must match x.x.x format: " + newVersion));
     }
   }
   DomHelper.click("#version a[data-version]", e => loadVersion(e.target.dataset.version));
