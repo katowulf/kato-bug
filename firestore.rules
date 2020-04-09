@@ -4,10 +4,11 @@ service cloud.firestore {
       match /foo {
         allow read: if true;
         allow write: if
-          request.resource.data.keys().size() == 1 &&
-          request.resource.data.keys().hasAll(['foo']) &&
-          request.resource.data.foo is string &&
-          request.resource.data.foo.length < 4;
+            request.auth.uid != null &&
+            request.resource.data.keys().size() == 1 &&
+            request.resource.data.keys().hasAll(['foo']) &&
+            request.resource.data.foo is string &&
+            request.resource.data.foo.size() < 4;
       }
     }
     match /google-cloud-firestore-discuss {
