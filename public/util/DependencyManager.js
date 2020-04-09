@@ -4,7 +4,7 @@ class DependencyManager {
     this.parallelLibs = [];
     this.afterLibs = [];
     if( firebaseVersion > "4.1.0" ) {
-      this.preLibs = [`/__/firebase/${version}/firebase-app.js`];
+      this.preLibs = [`/__/firebase/${firebaseVersion}/firebase-app.js`];
       this.firebaseLibs = firebaseLibs.map(lib => `/__/firebase/${firebaseVersion}/firebase-${lib}.js`);
     }
     else {
