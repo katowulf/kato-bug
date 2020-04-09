@@ -1,0 +1,70 @@
+{
+  "rules": {
+    "app": {
+      "foo": {
+        ".read": true,
+        ".write": "auth != null && newData.isString() && newData.val().length < 4"
+      }
+    },
+    "fiddle": {
+      "katowulf": {
+        // https://jsfiddle.net/katowulf/7s609r66/
+        "7s609r66": {
+          ".read": true,
+          "$entry": {
+            ".write": true,
+            ".validate": "newData.hasChildren(['timestamp', 'value'])",
+            "timestamp": {
+              ".validate": "newData.isNumber() && newData.val() <= now + 500"
+            },
+            "value": {
+              ".validate": "newData.hasChildren(['z', 'x', 'y'])",
+              "z": { ".validate": "newData.isNumber() && newData.val() <= 180" },
+              "x": { ".validate": "newData.isNumber() && newData.val() <= 180" },
+              "y": { ".validate": "newData.isNumber() && newData.val() <= 180" }
+            }
+          }
+        }
+      }
+    },
+    "groups": {
+      // https://groups.google.com/forum/#!msg/firebase-talk/NXfFvMfA6bg/0vWw831NBAAJ
+      "NXfFvMfA6bg": {
+        "students": {
+          // grants query access at /dev/students
+
+          ".read": "auth.uid != null &&
+          query.orderByChild == 'uuidc' &&
+          query.equalTo == auth.uid",
+          ".indexOn": "uuidc",
+          "$student_id": {
+            // grants read access at a specific student record to instructor or student
+            ".read": "auth.uid == $student_id || auth.uid == data.child('uuidc').val()"
+          }
+        }
+      }
+    },
+    "stackoverflow": {
+      "q55225145": {
+        // https://stackoverflow.com/questions/55225145/realtime-database-rules-check-if-a-given-array-includes-newdata-val
+        // must be one of false, 5, 15, 30, 60
+        "tryMatch": {
+          ".read": true,
+          ".write": "newData.val() === false || (newData.isNumber() && (newData.val()+'').matches(/^(5|15|30|60)$/))"
+        },
+        "tryHardCoded": {
+          ".read": true,
+          ".write": "newData.val() === false || newData.val() === 5 || newData.val() === 15 || newData.val() === 30 || newData.val() === 60"
+        }
+      }
+    },
+    "google-cloud-firestore-discuss": {
+      "7c69312a-f97d-4e89-81a7-5be7bc07b19c": {
+        // https://groups.google.com/d/msgid/google-cloud-firestore-discuss/7c69312a-f97d-4e89-81a7-5be7bc07b19c%40googlegroups.com
+        ".read": true,
+        ".write": "newData.exists()",
+        ".validate": "newData.isNumber() && newData.val() > -1 && newData.val() < 51"
+      }
+    }
+  }
+}

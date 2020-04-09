@@ -1,0 +1,27 @@
+body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; font-size: 1.2em; }
+#message { background: white; max-width: 360px; margin: 100px 48px 16px; padding: 32px 24px; border-radius: 3px; float: left; }
+#message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
+#message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
+#load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
+#log { float: left; max-width: 300px; margin: 100px 20px 20px; padding: 0; list-style: none; color: rgba(0,0,0,0.4); font-size: 13px }
+#log .error { color: red; }
+#message p { margin: 5px; padding: 0; }
+button.off, input.off { opacity: 0.4; }
+fieldset legend { font-size: .8em; }
+button, input { font-size: .9em; padding: .3em; }
+fieldset { margin-bottom: 1.25em; padding: 1em; }
+small { display: inline-block; font-size: 13px;}
+fieldset div.state {
+    float: right;
+    max-width: 30px;
+}
+
+i.success { color: green; }
+i.error { color: red; }
+i { color: gray; }
+
+@media (max-width: 600px) {
+    body, #message { margin-top: 0; background: white; box-shadow: none; }
+    body { border-top: 16px solid #ffa100; }
+    #log { margin: 8px; float: none; }
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kato's Debugging Pit</title>
+  <link rel="stylesheet" href="app.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+        rel="stylesheet">
+</head>
+<body>
+<div id="message">
+  <h2>Kato's Debugging Pit</h2>
+  <fieldset id="auth">
+    <div class="state"><i class="material-icons"></i></div>
+    <legend>Auth state</legend>
+    <p>Loading auth state...</p>
+    <button data-action="signIn">Sign in</button>
+    <button data-action="signOut">Sign out</button>
+  </fieldset>
+
+  <fieldset id="rtdb">
+    <div class="state"><i class="material-icons"></i></div>
+    <legend>Try writing data to RTDB</legend>
+    <input type="text" value="foo">
+    <button>Save</button>
+    <small>Must be 3 chars or less</small>
+  </fieldset>
+
+  <fieldset id="firestore">
+    <div class="state"><i class="material-icons"></i></div>
+    <legend>Try writing data to Firestore</legend>
+    <input type="text" value="foo">
+    <button>Save</button>
+    <small>Must be 3 chars or less</small>
+  </fieldset>
+
+  <fieldset id="version">
+    <legend>SDK versions</legend>
+    <p>
+      Load version:
+      <input type="text" value="7.13.2">
+      <button>Go</button>
+    </p>
+    <small></small>
+  </fieldset>
+</div>
+<p id="load">Firebase SDK Loading&hellip;</p>
+
+<ul id="log"></ul>
+
+<!-- Kato's junk -->
+<script defer src="app.js"></script>
+</body>
+</html>

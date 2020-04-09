@@ -1,0 +1,78 @@
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /app {
+      match /foo {
+        allow read: if true;
+        allow write: if
+          request.resource.data.keys().size() == 1 &&
+          request.resource.data.keys().hasAll(['foo']) &&
+          request.resource.data.foo is string &&
+          request.resource.data.foo.length < 4;
+      }
+    }
+    match /google-cloud-firestore-discuss {
+      match /7c69312a-f97d-4e89-81a7-5be7bc07b19c {
+        allow read: if true;
+        allow write: if request.resource.data.keys().size() == 1 && 
+            request.resource.data.number >= 0 && request.resource.data.number <= 50;
+      }
+      // https://groups.google.com/forum/?utm_medium=email&utm_source=footer#!msg/google-cloud-firestore-discuss/i9xK-2rJGYw/CFqXAMLvAwAJ
+      match /i9xK-2rJGYw_CFqXAMLvAwAJ/users/{user_id} {
+      	allow read: if request.auth.uid == resource.data.user_id;
+      }
+      
+      // https://groups.google.com/forum/?utm_medium=email&utm_source=footer#!msg/google-cloud-firestore-discuss/S4Vi8yhu9mw/IL7qsVe-AQAJ
+      match /S4Vi8yhu9mw_IL7qsVe-AQAJ/docs/writeFieldTest {
+ 				allow read: if true;
+        allow write: if request.resource.data.keys().hasOnly(['foo', 'bar']);
+      }
+    }
+    match /github {
+    	match /firebase-tools/b1234 {
+      	match /widgets/{widgetId} {
+          function isDocOwner(doc) {
+             return request.auth.uid in doc.data.owners;
+          }
+
+          function inWhitelist(doc) {
+             return request.auth.token.email in doc.data.whitelist;
+          }
+
+          allow get: if isDocOwner(resource) || inWhitelist(resource);
+          allow list: if request.query.limit < 200 && (isDocOwner(resource) || inWhitelist(resource));
+        }
+      }
+    }
+    match /firebase-talk {
+    	match /791dc982-ed39-4bb0-819f-d458e94f9bff {
+        allow read: if true;
+        allow write: if 
+            // must have exactly 4 fields with keys 'string', 'integer', 'boolean', and 'timestamp'
+            request.resource.data.size() == 4 && request.resource.data.keys().hasAll(['string', 'integer', 'boolean', 'timestamp']) && 
+            // string field must be less than 10 characters
+            request.resource.data.string is string && request.resource.data.string.size() < 10 &&
+            // integer field must be between 0 and 1000
+            request.resource.data.integer is int && request.resource.data.integer > -1 && request.resource.data.integer < 1001 && 
+            // boolean field must be a boolean
+            request.resource.data.boolean is bool && 
+            // timestamp must by a timestamp
+            request.resource.data.timestamp is timestamp
+      }
+      match /9bf13ba5-d623-4b78-b502-b0a73666c3e7 {
+        match /dev/{name} {
+          allow read : if resource.data.age >= 8
+        }
+      }
+      // https://groups.google.com/d/msgid/firebase-talk/1ce0f9cf-c283-4654-9110-777a0b070ddd%40googlegroups.com.
+      match /1ce0f9cf-c283-4654-9110-777a0b070ddd {
+        match /presidents/{id} {
+          allow read : if true;
+        }
+      }
+    }
+    match /cloud-firestore-hotline/CAH7iYHAxfgQTKC9kq74E6 {
+      allow read: if true
+      allow update: if request.resource.data.size() == 1 && request.resource.data.keys().hasAll(['list']) && request.resource.data.list is list
+    }
+  }
+}
