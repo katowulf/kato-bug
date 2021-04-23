@@ -67,6 +67,25 @@ export const getRaw = functions.https.onRequest((req, res) => {
   });
 });
 
+export const buildToken = functions.https.onRequest((req, res) => {
+  const key = req.params.xkey;
+  if( key !== '3H%*NrMs6Nb*73t15y$4sYzxfMl4%IezlJLDsl4h' ) {
+    res.status(403).send("Unauthorized");
+  }
+  const uid = req.params.uid;
+  const claims = req.params.claims;
+  admin
+      .auth()
+      .createCustomToken(uid, claims)
+      .then((customToken) => {
+        res.json({token: customToken});
+      })
+      .catch((error) => {
+        console.log('Error creating custom token:', error);
+        res.status(500).send("Error occurred");
+      });
+});
+
 function isValidPath(path: string) {
   switch(path) {
     case '/groups/NXfFvMfA6bg':
