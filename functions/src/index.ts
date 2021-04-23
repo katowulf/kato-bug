@@ -1,9 +1,8 @@
-import * as functions from 'firebase-functions';
-import * as admin from 'firebase-admin';
-import {Validator} from './Validator';
-const cors = require('cors')({
-  origin: true,
-});
+import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
+import {Validator} from "./Validator";
+import * as corsLib from "cors";
+const cors = corsLib({origin: true});
 
 admin.initializeApp();
 
@@ -18,77 +17,83 @@ export const hostedFunction = functions.https.onRequest((req, res) => {
 export const validateWriteRequest = functions.https.onRequest((req, res) => {
   return cors(req, res, () => {
     const validator = new Validator();
-    validator.addField('string', 'String', 'string', NaN, 10);
-    validator.addField('integer', 'Integer', 'number', 0, 1000);
-    validator.addField('boolean', 'Boolean', 'boolean');
-    validator.addField('timestamp', 'Timestamp', 'number', 0);
+    validator.addField("string", "String", "string", NaN, 10);
+    validator.addField("integer", "Integer", "number", 0, 1000);
+    validator.addField("boolean", "Boolean", "boolean");
+    validator.addField("timestamp", "Timestamp", "number", 0);
 
-    console.log('req.body', req.body);
-    console.log('req.params', req.params);
+    console.log("req.body", req.body);
+    console.log("req.params", req.params);
     const data = Object.assign({}, req.body);
 
     const errors = validator.validate(data);
     if (errors.length) {
-      res.send({status: 'invalid', errors: errors});
+      res.send({status: "invalid", errors: errors});
     } else {
       // convert timestamps
       data.timestamp = admin.firestore.Timestamp.fromDate(new Date(data.timestamp));
 
-      admin.firestore().doc('firebase-talk/791dc982-ed39-4bb0-819f-d458e94f9bff').set(data)
-          .then(() => res.send({status: 'success'}))
-          .catch(e => res.send({status: 'error', error: e}));
+      admin.firestore().doc("firebase-talk/791dc982-ed39-4bb0-819f-d458e94f9bff").set(data)
+          .then(() => res.send({status: "success"}))
+          .catch(e => res.send({status: "error", error: e}));
     }
-    res.send({status: errors.length ? 'error' : 'success', errors: errors.length ? errors : null});
+    res.send({
+      status: errors.length ? "error" : "success",
+      errors: errors.length ? errors : null
+    });
   });
 });
 
 
 // Not sure where these came from
 
-export const readRaw = functions.https.onCall((data, context) => {
+export const readRaw = functions.https.onCall((data/* , context*/) => {
   const path = data.path;
-  if( !isValidPath(path) ) {
-    throw new functions.https.HttpsError('invalid-argument', "Path was not valid");
+  if (!isValidPath(path)) {
+    throw new functions.https.HttpsError("invalid-argument", "Path was not valid");
   }
   return readData(path);
 });
 
 export const getRaw = functions.https.onRequest((req, res) => {
   const path = req.params.path;
-  console.log('Path', path);
+  console.log("Path", path);
   return cors(req, res, () => {
-    if( isValidPath(path) ) {
-      readData(path).then(data => res.send(data))
-          .catch(e => res.status(400).send({error: e}));
-    }
-    else {
-      res.status(400).send({error: 'Invalid path'});
+    if (isValidPath(path)) {
+      readData(path).then((data) => res.send(data))
+          .catch((e) => res.status(400).send({error: e}));
+    } else {
+      res.status(400).send({error: "Invalid path"});
     }
   });
 });
 
 export const buildToken = functions.https.onRequest((req, res) => {
-  const key = req.params.xkey;
-  if( key !== '3H%*NrMs6Nb*73t15y$4sYzxfMl4%IezlJLDsl4h' ) {
+  const data = Object.assign({}, req.body);
+  functions.logger.log("data", data);
+  const key = data.xkey;
+  if (key !== "3H%*NrMs6Nb*73t15y$4sYzxfMl4%IezlJLDsl4h") {
     res.status(403).send("Unauthorized");
+    return;
   }
-  const uid = req.params.uid;
-  const claims = req.params.claims;
-  admin
-      .auth()
-      .createCustomToken(uid, claims)
-      .then((customToken) => {
-        res.json({token: customToken});
-      })
-      .catch((error) => {
-        console.log('Error creating custom token:', error);
-        res.status(500).send("Error occurred");
-      });
+  res.json({foo: "bar"});
+  // const uid = data.uid;
+  // const claims = data.claims;
+  // admin
+  //     .auth()
+  //     .createCustomToken(uid, claims)
+  //     .then((customToken) => {
+  //       res.json({token: customToken});
+  //     })
+  //     .catch((error) => {
+  //       console.log("Error creating custom token:", error);
+  //       res.status(500).send("Error occurred");
+  //     });
 });
 
 function isValidPath(path: string) {
-  switch(path) {
-    case '/groups/NXfFvMfA6bg':
+  switch (path) {
+    case "/groups/NXfFvMfA6bg":
       return true;
     default:
       return false;
@@ -96,5 +101,5 @@ function isValidPath(path: string) {
 }
 
 function readData(path: string) {
-  return admin.database().ref(path).once('value').then(snap => snap.val());
+  return admin.database().ref(path).once("value").then(snap => snap.val());
 }
